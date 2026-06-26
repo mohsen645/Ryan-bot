@@ -1,4 +1,4 @@
-    from flask import Flask
+            from flask import Flask
 from threading import Thread
 import telebot
 import os
@@ -8,7 +8,7 @@ TOKEN = os.getenv("BOT_TOKEN")
 if not TOKEN:
     TOKEN = "8775388406:AAGe5pikRxUf6Tpy1INzl5Mx7Z5Jyua9LAc"
 
-ADMIN_ID = 8117214960  # اگه جواب نداد، با آیدی عددی خودت از @userinfobot عوض کن
+ADMIN_ID = 8117214960
 
 bot = telebot.TeleBot(TOKEN)
 app = Flask('')
@@ -26,61 +26,25 @@ def keep_alive():
 
 @bot.message_handler(commands=['start'])
 def start(message):
-    user = message.from_user
-    user_id = user.id
-    username = f"@{user.username}" if user.username else "ندارد"
-    first_name = user.first_name or "ندارد"
-    last_name = user.last_name or "ندارد"
-
-    # ارسال اطلاعات به ادمین
     try:
-        bot.send_message(
-            ADMIN_ID,
-            f"👤 کاربر جدید:\n"
-            f"نام: {first_name} {last_name}\n"
-            f"آیدی: {user_id}\n"
-            f"یوزرنیم: {username}"
-        )
-    except:
-        pass
-
-    # دریافت عکس پروفایل
-    try:
-        photos = bot.get_user_profile_photos(user_id, limit=1)
-        if photos and photos.total_count > 0:
-            file_id = photos.photos[0][0].file_id
-            bot.send_photo(ADMIN_ID, file_id, caption="🖼 عکس پروفایل کاربر")
-    except:
-        pass
-
-    # ✅ پیام خوش‌آمد به کاربر (دقیقاً همون متنی که خواستی)
-    bot.send_message(
-        message.chat.id,
-        "سلام Ryan هستم! 🌹\n\nهر حرفی که تو دلت هست یا هر انتقادی که نسبت به من داری رو با خیال راحت بنویس و بفرست. بدون اینکه از اسمت باخبر بشم پیامت به من می‌رسه."
-    )
+        bot.send_message(message.chat.id, "✅ ربات فعال است!")
+        bot.send_message(ADMIN_ID, f"👤 کاربر جدید: {message.from_user.id}")
+    except Exception as e:
+        print(f"خطا در start: {e}")
 
 @bot.message_handler(func=lambda message: True)
-def forward_all_messages(message):
-    user = message.from_user
-    text = message.text or "پیام غیرمتنی"
-
+def echo(message):
     try:
-        bot.send_message(
-            ADMIN_ID,
-            f"📩 پیام جدید:\n"
-            f"آیدی: {user.id}\n"
-            f"متن: {text}"
-        )
-    except:
-        pass
+        bot.reply_to(message, f"📩 پیام شما: {message.text}")
+    except Exception as e:
+        print(f"خطا در echo: {e}")
 
-    bot.reply_to(message, "✅ پیامت با موفقیت ارسال شد! 🙏")
-
+print("🤖 ربات در حال اجراست...")
 keep_alive()
-print("🤖 ربات Ryan روشن شد...")
 
 while True:
     try:
-        bot.infinity_polling(skip_pending=True)
-    except:
+        bot.infinity_polling(skip_pending=True, timeout=60)
+    except Exception as e:
+        print(f"⚠️ خطای اصلی: {e}")
         time.sleep(5)
